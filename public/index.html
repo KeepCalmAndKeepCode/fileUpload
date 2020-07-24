@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <form action="">
+    姓名：<input type="text" name="user" id="user"><br>
+    <input type="file" name="myFile" id="myFile">单图上传
+    <button>提交</button>
+    <img src="" alt="" id="myImg" srcset="">
+    <div>
+      <input type="file" name="myFiles" id="myFiles" multiple>多图上传
+    </div>
+    <div id="multiplePictures"></div>
+  </form>
+</body>
+<script src="./jquery.js"></script>
+<script>
+  $("#myFile").change(function (e) {
+    var myFile = document.getElementById("myFile");
+    console.log($(this)[0].files[0]);
+    var data = new FormData();
+    data.set("user", $("#user").val());
+    data.set("file", $(this)[0].files[0]);
+
+    // Array.from(myFile.files).forEach(function (file) {
+    //   data.append("fileName", file);
+    // })
+    console.log(data);
+    $.ajax({
+      type: "POST",
+      url: "/upload",
+      contentType: false,  //processData 默认为true，当设置为true的时候,jquery ajax 提交的时候不会序列化 data，而是直接使用data
+      processData: false,
+      data,
+      success: res => {
+        console.log(res);
+        $("#myImg").attr("src", res.data.url);
+      }
+    })
+  })
+
+  // 多图上传
+  $("#myFiles").change(function (e) {
+    var data = new FormData();
+    data.set("user", $("#user").val());
+    // data.set("files", $(this)[0].files);
+    $.each($(this)[0].files, function (i, file) {
+      data.append('files', file);
+      // data.set('upload_file', file);
+    });
+    console.log(data);
+    $.ajax({
+      type: "POST",
+      url: "/uploads",
+      contentType: false,  //processData 默认为true，当设置为true的时候,jquery ajax 提交的时候不会序列化 data，而是直接使用data
+      processData: false,
+      data,
+      success: res => {
+        console.log(res);
+        for(let item of res.data.filesList){
+          $("#multiplePictures").append(
+            `<img src="${item}">`
+          );
+        }
+      }
+    })
+  })
+</script>
+
+</html>
